@@ -290,29 +290,38 @@ class WireguardFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
+    // private fun getDownloadData(result: Result) {
+    //     scope.launch(Dispatchers.IO) {
+    //         try {
+    //             val downloadData = futureBackend.await().getTransferData(tunnel(tunnelName)).rxBytes
+    //             flutterSuccess(result, downloadData)
+    //         } catch (e: Throwable) {
+    //             Log.e(TAG, "getDownloadData - ERROR - ${e.message}")
+    //             flutterError(result, e.message.toString())
+    //         }
+    //     }
+    // }
+
+    // private fun getUploadData(result: Result) {
+    //     scope.launch(Dispatchers.IO) {
+    //         try {
+    //             val uploadData = futureBackend.await().getTransferData(tunnel(tunnelName)).txBytes
+    //             flutterSuccess(result, uploadData)
+    //         } catch (e: Throwable) {
+    //             Log.e(TAG, "getUploadData - ERROR - ${e.message}")
+    //             flutterError(result, e.message.toString())
+    //         }
+    //     }
+    // }
+
     private fun getDownloadData(result: Result) {
-        scope.launch(Dispatchers.IO) {
-            try {
-                val downloadData = futureBackend.await().getTransferData(tunnel(tunnelName)).rxBytes
-                flutterSuccess(result, downloadData)
-            } catch (e: Throwable) {
-                Log.e(TAG, "getDownloadData - ERROR - ${e.message}")
-                flutterError(result, e.message.toString())
-            }
-        }
+        flutterSuccess(result, 0L)
     }
 
     private fun getUploadData(result: Result) {
-        scope.launch(Dispatchers.IO) {
-            try {
-                val uploadData = futureBackend.await().getTransferData(tunnel(tunnelName)).txBytes
-                flutterSuccess(result, uploadData)
-            } catch (e: Throwable) {
-                Log.e(TAG, "getUploadData - ERROR - ${e.message}")
-                flutterError(result, e.message.toString())
-            }
-        }
+        flutterSuccess(result, 0L)
     }
+
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
