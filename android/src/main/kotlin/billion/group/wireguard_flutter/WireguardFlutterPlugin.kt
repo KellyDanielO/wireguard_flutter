@@ -323,11 +323,31 @@ class WireguardFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
 
+    // override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    //     channel.setMethodCallHandler(null)
+    //     events.setStreamHandler(null)
+    //     isVpnChecked = false
+    // }
+
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         events.setStreamHandler(null)
         isVpnChecked = false
+
+        scope.launch(Dispatchers.IO) {
+            try {
+                if (!futureBackend.isCompleted) return@launch
+                val backend = futureBackend.await()
+                for (name in backend.runningTunnelNames) {
+                    backend.setState(tunnel(name), Tunnel.State.DOWN, null)
+                }
+                updateStage("disconnected")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to stop tunnel on detach: ${e.message}")
+            }
+        }
     }
+
 
     private fun tunnel(name: String, callback: StateChangeCallback? = null): WireGuardTunnel {
         if (tunnel == null) {
