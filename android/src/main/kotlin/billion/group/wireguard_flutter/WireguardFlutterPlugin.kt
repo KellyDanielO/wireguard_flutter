@@ -159,9 +159,20 @@ class WireguardFlutterPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             "stage" -> {
                 result.success(getStatus())
             }
+            // "checkPermission" -> {
+            //     checkPermission()
+            //     result.success(null)
+            // }
             "checkPermission" -> {
-                checkPermission()
-                result.success(null)
+                val intent = GoBackend.VpnService.prepare(this.activity)
+                if (intent != null) {
+                    havePermission = false
+                    this.activity?.startActivityForResult(intent, PERMISSIONS_REQUEST_CODE)
+                    result.success(false) // Not granted yet, dialog will be shown
+                } else {
+                    havePermission = true
+                    result.success(true) // Already granted
+                }
             }
             "getDownloadData" -> {
                 getDownloadData(result)
