@@ -1,14 +1,36 @@
 package billion.group.wireguard_flutter
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.VpnService
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import kotlinx.coroutines.*
-
 import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.Tunnel
 
 class WireGuardService : VpnService() {
+
+    private val CHANNEL_ID = "wireguard_vpn_channel"
+    private val NOTIFICATION_ID = 1001
+
+    override fun onCreate() {
+        super.onCreate()
+        // Create a persistent notification so the OS keeps this service alive
+        createNotificationChannel()
+        val notification: Notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("VPN Active")
+            .setContentText("WireGuard tunnel is running")
+            .setSmallIcon(android.R.drawable.stat_sys_vpn_lock)
+            .setOngoing(true)
+            .build()
+
+        // This keeps the VPN alive in background
+        startForeground(NOTIFICATION_ID, notification)
+    }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         GlobalScope.launch(Dispatchers.IO) {
@@ -25,5 +47,18 @@ class WireGuardService : VpnService() {
         }
         stopSelf()
         super.onTaskRemoved(rootIntent)
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Tunneldeck VPN",
+                NotificationManager.IMPORTANCE_LOW
+            )
+            channel.description = "Keeps Tunneldeck VPN alive"
+            val manager = getSystemService(NotificationManager::class.java)
+            manager?.createNotificationChannel(channel)
+        }
     }
 }
